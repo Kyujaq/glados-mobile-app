@@ -3,6 +3,7 @@ import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 import { useAppContext } from '../providers/AppProvider';
 import VoiceInteractionScreen from '../features/interaction/VoiceInteractionScreen';
 import TextChatScreen from '../features/chat/TextChatScreen';
+import SettingsScreen from '../features/settings/SettingsScreen';
 import { useTheme } from '../theme';
 
 const baseStyles = StyleSheet.create({
@@ -21,14 +22,16 @@ const baseStyles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
   },
-  spacer: {
-    width: 12,
-    height: 1,
-  },
   screenContainer: {
     flex: 1,
   },
 });
+
+const tabs = [
+  { mode: 'voice' as const, label: 'Voice' },
+  { mode: 'text' as const, label: 'Text' },
+  { mode: 'settings' as const, label: 'Settings' },
+];
 
 const AppNavigator = (): JSX.Element => {
   const { interactionMode, setInteractionMode } = useAppContext();
@@ -44,6 +47,7 @@ const AppNavigator = (): JSX.Element => {
           borderColor: colors.outline,
           backgroundColor: colors.surface,
           padding: spacing.xs,
+          gap: spacing.sm,
         },
         tabButtonActive: {
           backgroundColor: colors.primary,
@@ -65,9 +69,6 @@ const AppNavigator = (): JSX.Element => {
           color: colors.textSecondary,
           fontWeight: '500',
         },
-        spacer: {
-          width: spacing.sm,
-        },
       }),
     [
       colors.background,
@@ -82,7 +83,7 @@ const AppNavigator = (): JSX.Element => {
     ],
   );
 
-  const renderTabButton = (mode: typeof interactionMode, label: string) => {
+  const renderTabButton = (mode: 'voice' | 'text' | 'settings', label: string) => {
     const isActive = interactionMode === mode;
     const buttonStyle = isActive ? themedStyles.tabButtonActive : themedStyles.tabButtonInactive;
     const labelStyle = isActive ? themedStyles.tabLabelActive : themedStyles.tabLabelInactive;
@@ -100,16 +101,24 @@ const AppNavigator = (): JSX.Element => {
     );
   };
 
+  const renderScreen = () => {
+    switch (interactionMode) {
+      case 'voice':
+        return <VoiceInteractionScreen />;
+      case 'text':
+        return <TextChatScreen />;
+      case 'settings':
+      default:
+        return <SettingsScreen />;
+    }
+  };
+
   return (
     <SafeAreaView style={[baseStyles.safeArea, themedStyles.safeArea]}>
       <View style={[baseStyles.tabBar, themedStyles.tabBar]}>
-        {renderTabButton('voice', 'Voice')}
-        <View style={[baseStyles.spacer, themedStyles.spacer]} />
-        {renderTabButton('text', 'Text')}
+        {tabs.map(tab => renderTabButton(tab.mode, tab.label))}
       </View>
-      <View style={baseStyles.screenContainer}>
-        {interactionMode === 'voice' ? <VoiceInteractionScreen /> : <TextChatScreen />}
-      </View>
+      <View style={baseStyles.screenContainer}>{renderScreen()}</View>
     </SafeAreaView>
   );
 };

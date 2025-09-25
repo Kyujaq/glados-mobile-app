@@ -25,4 +25,10 @@ Follow the existing imperative style seen in `Initial commit: Add README and pac
 
 ## Environment & Configuration
 
-Develop against Node 18+ and the React Native CLI. Store secrets such as Tailscale auth keys in `.env.local` and document required values in the PR description rather than committing them. When adding new endpoints, update the configuration constants under `src/config/` (create if missing) and keep environment-specific overrides in `.env.development` or `.env.production`.
+Develop against Node 18+ and the React Native CLI. Store secrets such as Tailscale auth keys in `.env.local` and document required values in the PR description rather than committing them. Update environment files using the keys below and keep non-secret defaults in version control only when helpful:
+
+- `API_BASE_URL`, `STT_PATH`, `TTS_PATH`, `TEXT_CHAT_PATH`, `HEALTH_PATH`
+- `TAILSCALE_HOSTNAME`, `TAILSCALE_IP`, `TAILSCALE_PORT`, `USE_TLS`
+- `API_AUTH_TOKEN` for bearer auth (never commit real tokens)
+
+Run `npm run lint` and `npm test` before opening a PR; the transport tests assert URL resolution, headers, and basic streaming behaviour. Use the in-app **Settings** tab to verify connectivity against a tailnet host—changes persist to AsyncStorage and reconfigure the shared transport automatically.

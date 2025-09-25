@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { transport } from '../services';
+import { useSettings } from './SettingsProvider';
 
-export type InteractionMode = 'voice' | 'text';
+export type InteractionMode = 'voice' | 'text' | 'settings';
 export type ConnectionState = 'idle' | 'connecting' | 'connected' | 'error';
 
 interface AppContextValue {
@@ -15,6 +17,18 @@ const AppContext = createContext<AppContextValue | undefined>(undefined);
 export const AppProvider = ({ children }: { children: React.ReactNode }): JSX.Element => {
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('voice');
   const [connectionState, setConnectionState] = useState<ConnectionState>('idle');
+
+  const { loading: settingsLoading } = useSettings();
+
+  useEffect(() => {
+    if (settingsLoading) {
+      return;
+    }
+
+    const unsubscribe = transport.subscribe(setConnectionState);
+    transport.probeConnection().catch(() => undefined);
+    return unsubscribe;
+  }, [settingsLoading]);
 
   const value = useMemo(
     () => ({ interactionMode, setInteractionMode, connectionState, setConnectionState }),

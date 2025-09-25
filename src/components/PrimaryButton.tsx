@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
 
 type ButtonVariant = 'solid' | 'outline';
@@ -9,6 +9,7 @@ interface PrimaryButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   variant?: ButtonVariant;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const PrimaryButton = ({
@@ -16,6 +17,7 @@ export const PrimaryButton = ({
   onPress,
   disabled = false,
   variant = 'solid',
+  style,
 }: PrimaryButtonProps): JSX.Element => {
   const { colors, typography } = useTheme();
   const isOutline = variant === 'outline';
@@ -29,9 +31,10 @@ export const PrimaryButton = ({
         styles.base,
         {
           backgroundColor: isOutline ? 'transparent' : colors.primary,
-          borderColor: colors.primary,
+          borderColor: isOutline ? colors.outline : colors.primary,
           opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
         },
+        style,
       ]}
     >
       <Text

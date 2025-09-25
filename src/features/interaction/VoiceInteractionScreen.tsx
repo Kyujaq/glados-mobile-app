@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { PrimaryButton, Surface } from '../../components';
 import { useTheme } from '../../theme';
@@ -6,7 +6,17 @@ import { useConnectionStatus } from '../../hooks';
 
 const VoiceInteractionScreen = (): JSX.Element => {
   const { colors, spacing, typography } = useTheme();
-  const { connectionState } = useConnectionStatus();
+  const { connectionState, refreshConnection } = useConnectionStatus();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshConnection();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshConnection]);
 
   return (
     <View style={[styles.container, { padding: spacing.lg }]}>
@@ -31,7 +41,14 @@ const VoiceInteractionScreen = (): JSX.Element => {
         </View>
       </Surface>
       <View style={styles.actionArea}>
-        <PrimaryButton label="Hold to Stream" disabled />
+        <PrimaryButton
+          label={refreshing ? 'Checking...' : 'Check Connectivity'}
+          onPress={handleRefresh}
+          disabled={refreshing}
+          variant="outline"
+          style={styles.checkButton}
+        />
+        <PrimaryButton label="Hold to Stream" disabled style={styles.streamButton} />
         <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.sm }]}>
           Microphone integration pending native module wiring.
         </Text>
@@ -68,6 +85,13 @@ const styles = StyleSheet.create({
   actionArea: {
     marginTop: 32,
     alignItems: 'center',
+    gap: 16,
+  },
+  streamButton: {
+    alignSelf: 'stretch',
+  },
+  checkButton: {
+    alignSelf: 'stretch',
   },
 });
 

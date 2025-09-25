@@ -1,63 +1,64 @@
 # GLaDOS Mobile App
 
-This is the official mobile client for the GLaDOS Streaming System. The app provides a seamless voice interface to interact with the GLaDOS assistant running on your private network, accessible via Tailscale.
+This is the official mobile client for the GLaDOS Streaming System. The app provides a secure voice and text front-end that tunnels through Tailscale to your self-hosted assistant.
 
-## ðŸš€ Features
+## Features
 
-- **Real-time Interaction**: Push-to-talk functionality for streaming voice directly to the STT (Speech-to-Text) service.
-- **Streaming Responses**: Receives and plays TTS (Text-to-Speech) audio from GLaDOS in real-time.
-- **Secure Connectivity**: Designed to connect to the GLaDOS backend exclusively through a secure Tailscale network.
-- **Cross-Platform**: Built with React Native for a consistent experience on both Android and iOS.
+- Push-to-talk streaming to the speech-to-text webhook running on your home server
+- Real-time playback of text-to-speech responses
+- Optional text chat mode that reuses the same secure transport
+- Cross-platform React Native codebase for Android and iOS
 
-## ðŸ› ï¸ Tech Stack
+## Tech Stack
 
-- **Framework**: [React Native](https://reactnative.dev/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **State Management**: (To be determined - likely React Context or Zustand)
-- **Networking**: WebSockets for STT, HTTP Streaming for TTS.
+- React Native 0.74 with the React 18 runtime
+- TypeScript with ESLint and Prettier enforcement
+- Jest for unit tests and Metro for local development
 
-## ðŸ Getting Started
+## Getting Started
 
-> **Note:** The full setup instructions will be added as we build the application.
-
-1.  **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/Kyujaq/glados-mobile-app.git
-    cd glados-mobile-app
-    ```
-
-2.  **Install dependencies:**
-
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-
-3.  **Run the application:**
-
-    ```bash
-    # For Android
-    npm run android
-
-    # For iOS
-    npm run ios
-    ```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Kyujaq/glados-mobile-app.git
+   cd glados-mobile-app
+   ```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+3. **Run the app**
+   ```bash
+   npm run start      # Metro bundler
+   npm run android    # or npm run ios
+   ```
 
 ## Development Environment
 
-- Use Node 18.18.0 (`nvm use`) and install dependencies with `npm install`.
-- Configure the React Native toolchain: Watchman (macOS), Xcode 15 for iOS, and Android Studio with SDK 34; accept all licenses.
-- Sign in to the same Tailscale tailnet on your development device to reach the home server.
-- Install the React Native CLI globally (`npx react-native --version`) if it is not already on the PATH.
+- Use Node 18.18.0 (`nvm use`) and install Watchman, Xcode 15, and Android Studio SDK 34
+- Make sure your dev device is signed into the same Tailscale tailnet as the home server
+- React Native CLI (`npx react-native --version`) should be resolvable on your PATH
 
 ## Configuration
 
-1. Copy `.env.example` to `.env.local` and set `API_BASE_URL` to the Tailscale address of your Linux host.
-2. Adjust `STT_PATH`, `TTS_PATH`, and `TEXT_CHAT_PATH` to match the webhook routes exposed by the server.
-3. Run `npm run start` to launch Metro, then `npm run android` or `npm run ios` in another shell.
-4. Commit secrets only to your secret manager—never to git; share required values via PR descriptions or deployment docs.
+Copy `.env.example` to `.env.local` and update the keys below. Check in environment files **only** when they contain non-secret defaults. You can also adjust these values inside the in-app **Settings** tab (they persist via AsyncStorage).
+
+| Key                  | Description                                                          | Example                        |
+| -------------------- | -------------------------------------------------------------------- | ------------------------------ |
+| `API_BASE_URL`       | Base URL for webhook traffic; leave blank to derive from Tailnet IP  | `https://tailscale-node.local` |
+| `STT_PATH`           | Speech-to-text streaming endpoint                                    | `/api/stt/stream`              |
+| `TTS_PATH`           | Text-to-speech streaming endpoint                                    | `/api/tts/stream`              |
+| `TEXT_CHAT_PATH`     | Text chat webhook endpoint                                           | `/api/chat/text`               |
+| `HEALTH_PATH`        | Health probe path used by the transport client                       | `/healthz`                     |
+| `TAILSCALE_HOSTNAME` | Human-readable Tailscale hostname                                    | `tailscale-node.local`         |
+| `TAILSCALE_IP`       | Optional MagicDNS / 100.x IP override                                | `100.64.0.12`                  |
+| `TAILSCALE_PORT`     | Optional non-standard port override                                  | `4430`                         |
+| `USE_TLS`            | Toggle HTTPS vs HTTP when building derived URLs                      | `true`                         |
+| `API_AUTH_TOKEN`     | Bearer token forwarded on each request (leave blank for development) | `changeme`                     |
+
+## Testing
+
+- `npm run lint` ensures ESLint and Prettier compliance
+- `npm test` runs the Jest suites, including transport unit tests
 
 ## Project Layout
 
@@ -66,7 +67,7 @@ src/
   App.tsx                # App provider stack and navigation host
   navigation/            # Temporary tab switcher for voice vs text
   features/
-    interaction/         # Voice push-to-talk workflow stubs
+    interaction/         # Voice push-to-talk workflow
     chat/                # Text session components
   services/              # Transport client and future integrations
   config/                # Environment bindings and shared constants
@@ -76,6 +77,6 @@ src/
 
 ## Next Steps
 
-- Wire the transport layer to real webhook calls with authentication through Tailscale.
-- Integrate microphone capture and audio playback once native modules are configured.
-- Replace the temporary navigator with React Navigation for richer flows.
+- Wire the transport client to the production webhooks with authentication and streaming codecs
+- Integrate microphone capture and audio playback once native modules are configured
+- Replace the temporary navigator with React Navigation for richer flows and settings
